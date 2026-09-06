@@ -201,6 +201,12 @@ export async function runFakequoteCommand(
     return;
   }
 
+  // Resolving mentions and rendering the image below can easily run past
+  // Discord's 3-second ack window, so this needs to be a real response
+  // before doing any of that — same reasoning as the "Quote" context menu
+  // command in quote.ts.
+  await interaction.deferReply();
+
   const member = interaction.guild
     ? await interaction.guild.members.fetch(author.id).catch(() => null)
     : null;
@@ -238,7 +244,7 @@ export async function runFakequoteCommand(
   });
   const png = await renderQuote(data, settings, { fake });
 
-  await interaction.reply({
+  const sent = await interaction.editReply({
     files: [new AttachmentBuilder(png, { name: "quote.png" })],
     components: buildComponents(
       settings,
@@ -246,7 +252,6 @@ export async function runFakequoteCommand(
       deleteButtonEnabled(interaction.guildId),
     ),
   });
-  const sent = await interaction.fetchReply();
 
   saveQuoteState(sent.id, {
     data,
