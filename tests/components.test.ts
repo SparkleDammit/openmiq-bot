@@ -206,4 +206,18 @@ describe("buildComponents", () => {
     const flip = findButton(buttons!, FLIP_BUTTON_ID);
     expect(flip.disabled).toBeFalsy();
   });
+
+  it("an explicit chaining:false wins over a stale chain:true setting, allowing new", () => {
+    // Mirrors /fakequote: it never chains, so it always passes chaining:
+    // false regardless of a saved chain:true default.
+    const [buttons] = buildComponents(
+      { ...DEFAULT_SETTINGS, layout: "new", chain: true },
+      "en",
+      false,
+      false,
+    );
+    const layout = findButton(buttons!, LAYOUT_BUTTON_ID);
+    expect(layout.disabled).toBeFalsy();
+    expect(layout.emoji?.name).toBe("🖥️");
+  });
 });

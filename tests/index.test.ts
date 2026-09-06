@@ -263,6 +263,17 @@ describe("buildTheme", () => {
     expect(theme.avatar).toEqual({ grayscale: true, position: "right" });
   });
 
+  it("an explicit chaining:false wins over a stale chain:true setting, allowing new", () => {
+    // Mirrors /fakequote: it never chains, so it always passes chaining:
+    // false regardless of a saved chain:true default — that shouldn't
+    // silently block layout:new the way settings.chain alone used to.
+    const theme = buildTheme(
+      { ...DEFAULT_SETTINGS, layout: "new", chain: true },
+      { chaining: false },
+    );
+    expect(theme.layout).toBe("new");
+  });
+
   it("resolves to the new layout's own 630x790 canvas, not the 1200x630 default", () => {
     const theme = buildTheme({ ...DEFAULT_SETTINGS, layout: "new" });
     const resolved = defineTheme(theme);

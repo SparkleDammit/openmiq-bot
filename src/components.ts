@@ -69,16 +69,24 @@ function activeStyle(active: boolean): ButtonStyle {
  * The buttons and the font/color-theme select menus shown under a posted
  * quote. `deleteButtonEnabled` gates the delete row — off entirely by
  * `/server-settings|/admin set delete-button:false` (see config/settings.ts).
+ *
+ * `chaining` says whether *this* quote actually rendered as a `MiQChain` —
+ * pass the same value given to `renderQuote()`'s `chainTop` option (as
+ * `!= null`), not `settings.chain` itself; see `buildTheme()`'s own doc
+ * comment on why those two can disagree. Falls back to `settings.chain`
+ * when a caller doesn't say, same as `buildTheme()`.
  */
 export function buildComponents(
   settings: QuoteSettings,
   locale: string,
   deleteButtonEnabled: boolean,
+  chaining?: boolean,
 ): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
+  const isChaining = chaining ?? settings.chain;
   // Mirrors buildTheme()'s own effective-layout logic: chain forces the
   // layout back to side, so the flip/layout buttons below reflect what
   // will actually render rather than the raw stored `layout` value.
-  const isNew = settings.layout === "new" && !settings.chain;
+  const isNew = settings.layout === "new" && !isChaining;
   // A color theme fixes its own light/dark text palette (see buildTheme()
   // in quoteOptions.ts) — same idea as flip having nothing to toggle once
   // the layout is new.
@@ -118,7 +126,7 @@ export function buildComponents(
         .setStyle(activeStyle(isNew))
         // Chain takes priority over new — see buildTheme() in
         // quoteOptions.ts — so there's nothing to switch to while it's on.
-        .setDisabled(settings.chain),
+        .setDisabled(isChaining),
     );
 
   const fontSelect = new StringSelectMenuBuilder()

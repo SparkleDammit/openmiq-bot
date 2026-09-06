@@ -142,6 +142,7 @@ export async function onInteractionCreate(
       settings,
       state.locale,
       deleteButtonEnabled(state.guildId),
+      state.chainTop != null,
     ),
   });
 }

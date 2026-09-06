@@ -101,6 +101,7 @@ export async function onMessageCreate(message: Message): Promise<void> {
       settings,
       locale,
       deleteButtonEnabled(message.guildId),
+      chainTop != null,
     ),
   });
 

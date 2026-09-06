@@ -246,10 +246,14 @@ export async function runFakequoteCommand(
 
   const sent = await interaction.editReply({
     files: [new AttachmentBuilder(png, { name: "quote.png" })],
+    // Chaining doesn't exist for /fakequote — there's no real reply to look
+    // one up from — so this is always false, regardless of a saved
+    // `chain: true` default that would otherwise block the layout button.
     components: buildComponents(
       settings,
       locale,
       deleteButtonEnabled(interaction.guildId),
+      false,
     ),
   });
 

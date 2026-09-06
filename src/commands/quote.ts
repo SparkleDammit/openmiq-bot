@@ -71,6 +71,7 @@ export async function runQuoteContextMenuCommand(
       settings,
       locale,
       deleteButtonEnabled(interaction.guildId),
+      chainTop != null,
     ),
   });
 

@@ -208,12 +208,22 @@ function unquote(value: string): string {
  * `fake` marks a `/fakequote` render: "(fake) @username" instead of the
  * usual "@username", so a fabricated quote can't be mistaken for a real
  * one at a glance.
+ *
+ * `chaining` says whether *this* render is actually going out as a
+ * `MiQChain`, which callers know (a reply source was found, or — for
+ * `/fakequote`, which never chains at all — simply never) and `settings`
+ * alone doesn't: `settings.chain` is just the saved *request* to chain
+ * whenever possible, and stays on even when there's nothing to chain onto.
+ * Forcing the layout to `side` for a request that goes nowhere would block
+ * `new` for no reason, so this falls back to `settings.chain` only when a
+ * caller doesn't say — every real render site does.
  */
 export function buildTheme(
   settings: QuoteSettings,
-  options?: { fake?: boolean },
+  options?: { fake?: boolean; chaining?: boolean },
 ): ThemeInput {
-  const isNew = settings.layout === "new" && !settings.chain;
+  const chaining = options?.chaining ?? settings.chain;
+  const isNew = settings.layout === "new" && !chaining;
   const light = settings.colorTheme
     ? colorThemeTextBase(settings.colorTheme) === "light"
     : settings.light;

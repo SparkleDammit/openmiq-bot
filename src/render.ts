@@ -14,9 +14,9 @@ export interface RenderQuoteOptions {
    * The message `data` is replying to, when `settings.chain` asked for one
    * and one was found — see `findChainTop()`. Renders as a `MiQChain`
    * (`chainTop` on top, `data` on the bottom) instead of a single quote.
-   * `buildTheme()` already forces the effective layout back to `side`
-   * whenever `settings.chain` is on, so `theme` below is never `new` here —
-   * no extra layout check needed.
+   * Its presence (not just `settings.chain`) is what tells `buildTheme()`
+   * whether to force the effective layout back to `side` — see its own doc
+   * comment on why those two aren't the same thing.
    */
   chainTop?: QuoteData | null;
 }
@@ -46,8 +46,11 @@ export async function renderQuote(
   settings: QuoteSettings,
   options?: RenderQuoteOptions,
 ): Promise<Buffer> {
-  const theme = buildTheme(settings, { fake: options?.fake });
   const chainTop = options?.chainTop;
+  const theme = buildTheme(settings, {
+    fake: options?.fake,
+    chaining: chainTop != null,
+  });
   const renderData = applyMarkdownSetting(data, settings.markdown);
   const renderChainTop = chainTop
     ? applyMarkdownSetting(chainTop, settings.markdown)
