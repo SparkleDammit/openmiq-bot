@@ -15,6 +15,7 @@ import {
 import { runQuoteContextMenuCommand } from "../commands/quote.js";
 import { runServerSettingsCommand } from "../commands/serverSettings.js";
 import { runSettingsCommand } from "../commands/settings.js";
+import { rejectQuote } from "../communityMirror.js";
 import {
   BOLD_BUTTON_ID,
   COLOR_BUTTON_ID,
@@ -151,6 +152,11 @@ export async function onInteractionCreate(
  * Soft-deletes a quote: only its generator or its subject may do this. The
  * message is edited, not actually deleted, so a `SAVE_IMAGES_DIR` copy of
  * the image (if any) is unaffected — it lives on disk, not in the message.
+ *
+ * Also retracts the community-page mirror (if this quote ever had one) so
+ * a Discord-side takedown doesn't leave a stale public copy behind —
+ * same `rejectQuote` the mod ❌-reaction retraction path uses, a no-op if
+ * the mirror was never configured or this quote was never mirrored.
  */
 async function handleDeleteButton(
   interaction: ButtonInteraction,
@@ -176,6 +182,7 @@ async function handleDeleteButton(
     components: [],
   });
   deleteQuoteState(interaction.message.id);
+  await rejectQuote(interaction.message.id);
 }
 
 function applyButton(

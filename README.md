@@ -1,3 +1,13 @@
+> **This is `openmiq-bot`, SparkleDammit's self-hosted deployment, based on
+> [OpenMiQ](https://github.com/otnc/OpenMiQ) (by **otoneko.**) with
+> modifications** — per [`ADDITIONAL_TERMS.md`](./ADDITIONAL_TERMS.md)
+> Section 7(c). Everything below this notice is upstream's own README,
+> unmodified. The modifications: after a real quote posts, it's mirrored
+> (best-effort, never blocking) to a Supabase table for
+> blog.nextexgirlfriend.com/community, gated by a Discord ✅/❌
+> mod-reaction approval step. See [`CLAUDE.md`](./CLAUDE.md) for what
+> changed and why, and [`sql/`](./sql) for the schema.
+
 <div align="center">
 
 <img src=".github/assets/icon.png" width="120" alt="OpenMiQ icon">

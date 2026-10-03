@@ -43,6 +43,7 @@
     "node": ">=24"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "discord.js": "^14.27.0",
     "makeitaquote": "^12.1.2",
     "mustache": "^4.2.0",

@@ -9,6 +9,7 @@ import { loadAppEmojis } from "./appEmojis.js";
 import { loadSettingsStores } from "./config/settings.js";
 import { onInteractionCreate } from "./handlers/interactionCreate.js";
 import { onMessageCreate } from "./handlers/messageCreate.js";
+import { onMessageReactionAdd } from "./handlers/messageReactionAdd.js";
 
 export async function main(): Promise<void> {
   const token = process.env.DISCORD_TOKEN;
@@ -50,6 +51,12 @@ export async function main(): Promise<void> {
       console.error("InteractionCreate handler failed:", error),
     );
   }) satisfies (...args: ClientEvents[Events.InteractionCreate]) => void);
+
+  client.on(Events.MessageReactionAdd, ((reaction, user) => {
+    void onMessageReactionAdd(reaction, user).catch((error) =>
+      console.error("MessageReactionAdd handler failed:", error),
+    );
+  }) satisfies (...args: ClientEvents[Events.MessageReactionAdd]) => void);
 
   await client.login(token);
 }

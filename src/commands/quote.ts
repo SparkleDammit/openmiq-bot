@@ -6,6 +6,7 @@ import {
 } from "discord.js";
 import { MiQ } from "makeitaquote";
 import { watermarkLogo } from "../branding.js";
+import { mirrorQuoteToSupabase } from "../communityMirror.js";
 import { buildComponents } from "../components.js";
 import {
   deleteButtonEnabled,
@@ -85,4 +86,6 @@ export async function runQuoteContextMenuCommand(
     targetId: target.author.id,
     fake: false,
   });
+
+  await mirrorQuoteToSupabase({ target, reply: sent, data, png });
 }

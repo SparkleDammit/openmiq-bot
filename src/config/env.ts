@@ -34,3 +34,19 @@ export const ICON_PATH = process.env.ICON_PATH?.trim()
 export const LOGO_PATH = process.env.LOGO_PATH?.trim()
   ? path.resolve(process.env.LOGO_PATH.trim())
   : null;
+
+/**
+ * Community-page mirror (writes to the NXGF Supabase project so
+ * blog.nextexgirlfriend.com/community can show approved quotes). Optional —
+ * unset either one and mirroring/approval is silently disabled, same as
+ * every other optional feature in this file.
+ */
+export const SUPABASE_URL = process.env.SUPABASE_URL?.trim() || null;
+export const SUPABASE_SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_KEY?.trim() || null;
+
+/** Discord role id allowed to approve/reject a quote via reaction. Required for the mirror's approval step to do anything. */
+export const MOD_ROLE_ID = process.env.MOD_ROLE_ID?.trim() || null;
+
+/** Reaction that approves a pending (or retracts an approved) quote. ❌ always rejects/retracts; this only configures the "yes" side. */
+export const APPROVAL_EMOJI = process.env.APPROVAL_EMOJI?.trim() || "✅";
