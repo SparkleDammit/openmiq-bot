@@ -1,5 +1,15 @@
 # CLAUDE.md — openmiq-bot
 
+> ⚠️ **Not deployed. Not the active quote pipeline.** Reconsidered 2026-10-03:
+> `../quote-mirror` reads the EXISTING third-party quote bot's output instead
+> of self-hosting a fork — no new AGPL obligations, no behavior change for
+> members, no Node exception to the Python house stack, and the extraction
+> logic turned out to be nearly identical either way. This repo is complete,
+> tested, and stays in GitHub (public, per its own AGPL reasoning below) as a
+> fallback if the third-party bot ever goes away and self-hosting generation
+> becomes the only option. Don't deploy it without re-confirming that's still
+> the plan — see `../quote-mirror/CLAUDE.md` for the active design.
+
 Repo-root brief for Claude / any dev. Part of the **NextEx Girlfriend** ecosystem — feeds the blog's `/community` page (`../getting-off`). Cross-app docs live at `../nextex-root/docs/`.
 
 ## What this is
