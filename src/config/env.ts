@@ -50,3 +50,14 @@ export const MOD_ROLE_ID = process.env.MOD_ROLE_ID?.trim() || null;
 
 /** Reaction that approves a pending (or retracts an approved) quote. ❌ always rejects/retracts; this only configures the "yes" side. */
 export const APPROVAL_EMOJI = process.env.APPROVAL_EMOJI?.trim() || "✅";
+
+/**
+ * One-off `backfill:quotes` script inputs only — not read anywhere else.
+ * QUOTE_CHANNEL_ID: the channel to scan for the previous quote bot's
+ * messages. OLD_BOT_USER_ID: that bot's own Discord user id (Developer
+ * Mode on → right-click one of its messages → Copy User ID), used to
+ * filter channel history rather than matching on its display name, which
+ * can be renamed or collide.
+ */
+export const QUOTE_CHANNEL_ID = process.env.QUOTE_CHANNEL_ID?.trim() || null;
+export const OLD_BOT_USER_ID = process.env.OLD_BOT_USER_ID?.trim() || null;

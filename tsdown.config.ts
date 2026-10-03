@@ -6,6 +6,7 @@ export default defineConfig({
     "src/deployCommandsCli.ts",
     "src/deployImagesCli.ts",
     "src/deploy.ts",
+    "src/backfillQuotesCli.ts",
   ],
   format: "esm",
   dts: false,

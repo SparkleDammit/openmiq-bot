@@ -14,6 +14,67 @@ export interface MirrorQuoteParams {
   png: Buffer;
 }
 
+/** A community_quotes row, in the same shape regardless of where it came from — the live mirror below, or `backfillQuotes.ts`'s one-off import from the previous quote bot's channel history. */
+export interface CommunityQuoteRow {
+  guildId: string;
+  channelId: string;
+  messageId: string;
+  replyMessageId: string;
+  quoteText: string;
+  quoteAuthor: string;
+  quoteAuthorId: string | null;
+  imageUrl: string;
+  discordMessageUrl: string;
+  status: "pending" | "approved" | "rejected";
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+}
+
+/** Uploads one quote-card image to the public Storage bucket, keyed by the ORIGINAL message's id (not the reply's) — matches the live mirror's path scheme so a backfilled row and a freshly-posted one can never collide. Returns the public URL, or `null` when Supabase isn't configured. Throws on an actual upload failure — callers decide how to handle that (the live path swallows it, the backfill script logs and skips that one item). */
+export async function uploadQuoteImage(
+  guildId: string,
+  messageId: string,
+  image: Buffer,
+): Promise<string | null> {
+  const supabase = supabaseClient();
+  if (!supabase) return null;
+  const path = `${guildId}/${messageId}.png`;
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, image, { contentType: "image/png", upsert: true });
+  if (error) throw error;
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return publicUrl;
+}
+
+/** Upserts one community_quotes row, keyed on (guild_id, message_id) — a second attempt at the same original message (a re-run of the backfill, or a double-fire of the live mirror) is silently ignored rather than erroring. No-op when Supabase isn't configured. */
+export async function insertCommunityQuote(
+  row: CommunityQuoteRow,
+): Promise<void> {
+  const supabase = supabaseClient();
+  if (!supabase) return;
+  const { error } = await supabase.from("community_quotes").upsert(
+    {
+      guild_id: row.guildId,
+      channel_id: row.channelId,
+      message_id: row.messageId,
+      reply_message_id: row.replyMessageId,
+      quote_text: row.quoteText,
+      quote_author: row.quoteAuthor,
+      quote_author_id: row.quoteAuthorId,
+      image_url: row.imageUrl,
+      discord_message_url: row.discordMessageUrl,
+      status: row.status,
+      approved_by: row.approvedBy ?? null,
+      approved_at: row.approvedAt ?? null,
+    },
+    { onConflict: "guild_id,message_id", ignoreDuplicates: true },
+  );
+  if (error) throw error;
+}
+
 /**
  * Best-effort mirror of a freshly-posted REAL quote (never a `/fakequote` —
  * callers only reach this from the two `fake: false` paths) into
@@ -29,35 +90,22 @@ export async function mirrorQuoteToSupabase({
   data,
   png,
 }: MirrorQuoteParams): Promise<void> {
-  const supabase = supabaseClient();
-  if (!supabase || !target.guildId) return;
-
+  if (!target.guildId) return;
   try {
-    const path = `${target.guildId}/${target.id}.png`;
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(path, png, { contentType: "image/png", upsert: true });
-    if (uploadError) throw uploadError;
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(BUCKET).getPublicUrl(path);
-
-    const { error: insertError } = await supabase
-      .from("community_quotes")
-      .insert({
-        guild_id: target.guildId,
-        channel_id: target.channelId,
-        message_id: target.id,
-        reply_message_id: reply.id,
-        quote_text: data.text,
-        quote_author: data.displayName || data.username,
-        quote_author_id: target.author?.id ?? null,
-        image_url: publicUrl,
-        discord_message_url: target.url,
-        status: "pending",
-      });
-    if (insertError) throw insertError;
+    const imageUrl = await uploadQuoteImage(target.guildId, target.id, png);
+    if (!imageUrl) return; // Supabase not configured
+    await insertCommunityQuote({
+      guildId: target.guildId,
+      channelId: target.channelId,
+      messageId: target.id,
+      replyMessageId: reply.id,
+      quoteText: data.text,
+      quoteAuthor: data.displayName || data.username,
+      quoteAuthorId: target.author?.id ?? null,
+      imageUrl,
+      discordMessageUrl: target.url,
+      status: "pending",
+    });
   } catch (error) {
     console.error("community_quotes mirror failed; continuing.", error);
   }
